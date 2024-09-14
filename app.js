@@ -3,13 +3,16 @@ const cors = require("cors");
 const path = require("path");
 const dotenv = require("dotenv");
 const AdminRouter = require("./ADMIN/AdminRouter");
+const ConnecionDb = require("./Connection");
+const bodyParser = require('body-parser');
 
 dotenv.config();
 
 const app = express();
 
-// Middleware to parse JSON
-app.use(express.json());
+
+const Port = process.env.PORT;
+ConnecionDb();
 
 // CORS configuration
 const allowedOrigins = [
@@ -21,7 +24,7 @@ const allowedOrigins = [
 //   cors({
 //     origin: function (origin, callback) {
 //       console.log("Incoming Origin:", origin);
-      
+
 //       if (!origin || allowedOrigins.includes(origin)) {
 //         callback(null, true);
 //       } else {
@@ -34,7 +37,6 @@ const allowedOrigins = [
 //     optionsSuccessStatus: 200,
 //   })
 // );
-
 
 app.use(
   cors({
@@ -55,6 +57,8 @@ app.use(
   })
 );
 
+app.use(bodyParser.json({ limit: "200mb" }));
+app.use(bodyParser.urlencoded({ limit: "300mb", extended: true }));
 
 app.use("/admin", AdminRouter);
 
@@ -71,7 +75,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server is started for serving on port ${port}`);
+app.listen(Port, () => {
+  console.log(`Server is started for serving on port ${Port}`);
 });
