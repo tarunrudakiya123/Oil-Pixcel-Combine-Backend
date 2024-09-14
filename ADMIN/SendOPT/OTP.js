@@ -5,7 +5,7 @@ const Send = (mailOPtion) => {
             service: "gmail",
             auth: {
                 user: "tarunrudakiya123@gmail.com",
-                pass: 'rktgcbaepqksdetz'
+                pass: 'qibc fbgl pltl jpch'
             }
         })
         Transporter.sendMail(mailOPtion, function (error, info) {
