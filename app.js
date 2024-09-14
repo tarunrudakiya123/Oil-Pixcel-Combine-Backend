@@ -28,7 +28,7 @@ App.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     preflightContinue: false,
-    optionsSuccessStatus: 204, // For legacy browser support
+    optionsSuccessStatus: 200, // For legacy browser support
   })
 );
 
