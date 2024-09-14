@@ -16,84 +16,63 @@ const Cookie = require("cookie-parser");
 
 const App = express();
 
+// Log environment variables
+console.log('Admin Panel URL:', process.env.REACT_APP_ADMINPANEL_FRONTEND_URL);
+console.log('Website URL:', process.env.REACT_APP_WEBSITE_FRONTEND_URL);
 
+App.use(json());
+ConnecionDb();
 
 const allowedOrigins = [
-  'https://oil-pixcel-admin-panel-f9w7.vercel.app',
-  'https://oil-pixcel-static-website.vercel.app'
+  process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
+  process.env.REACT_APP_WEBSITE_FRONTEND_URL,
 ];
 
 // Configure CORS
-App.use(cors({
-  origin: function(origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      // Allow requests with no origin or requests from the allowed origins
-      callback(null, true);
-    } else {
-      // Reject requests from disallowed origins
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-
-App.use(cors());
-
-App.use(json());
-
-ConnecionDb();
-
-// App.use("/uploads", express.static("./uploads"));
-App.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
-
-App.get("/", (req, res) => {
-  return res.status(200).send({ message: "Suceess" });
-});
-
-App.get("/product", productController.GetProduct);
-
-App.get("/product/:id", productController.GetProductById);
-
-App.post("/register", userController.RegisterUser);
-
-App.post("/login", userController.UserLogin);
-
-App.post("/cart", productController.GetCart);
-
-App.post(
-  "/neworder",
-  authController.CreatOrderAuth,
-  orderController.CreateOrder
+App.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204, // For legacy browser support
+  })
 );
-
-App.get("/order", authController.CreatOrderAuth, orderController.GetOrder);
-
-App.get(
-  "/order/:id",
-  authController.CreatOrderAuth,
-  orderController.getOrderByID
-);
-
-App.post(
-  "/payment/verify",
-  authController.CreatOrderAuth,
-  orderController.PaymentVerify
-);
-
-// App.get("/product/insert/many", productController.InserProduct)
 
 /////////// ADMIN API////////////
 
 App.use("/admin", AdminRouter);
+
 const options = {
   key: fs.readFileSync("Certification/key.pem"),
   cert: fs.readFileSync("Certification/cert.pem"),
 };
 
+// Serve static files
+App.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
+
+App.get("/", (req, res) => {
+  return res.status(200).send({ message: "Success" });
+});
+
+App.get("/product", productController.GetProduct);
+App.get("/product/:id", productController.GetProductById);
+App.post("/register", userController.RegisterUser);
+App.post("/login", userController.UserLogin);
+App.post("/cart", productController.GetCart);
+App.post("/neworder", authController.CreatOrderAuth, orderController.CreateOrder);
+App.get("/order", authController.CreatOrderAuth, orderController.GetOrder);
+App.get("/order/:id", authController.CreatOrderAuth, orderController.getOrderByID);
+App.post("/payment/verify", authController.CreatOrderAuth, orderController.PaymentVerify);
+
 const server = https.createServer(options, App);
 
 server.listen(process.env.PORT, () => {
-  console.log("Server Is Started For Serving");
+  console.log("Server is started for serving on port", process.env.PORT);
 });
