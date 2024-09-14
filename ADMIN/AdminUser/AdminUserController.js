@@ -1,7 +1,7 @@
 const Validation = require("../../User/Validation");
 const adminUserModel = require("./AdminUserModel");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const Randomstring = require("randomstring");
 const nodemailer = require("nodemailer");
 
@@ -67,7 +67,7 @@ class AdminUserController {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: "tarunrudakiya123@gmail.com",
+          user: "jadavpratik743@gmail.com",
           pass: process.env.EMAIL_PASSWORD,
         },
       });
@@ -109,7 +109,7 @@ class AdminUserController {
 
       // Prepare email options
       const mailOptions = {
-        from: "tarunrudakiya123@gmail.com",
+        from: "jadavpratik743@gmail.com",
         to: email,
         subject: "Oil Pixcel Login OTP",
         html: `
@@ -147,7 +147,6 @@ class AdminUserController {
           </div>
         `,
       };
-      
 
       // Send OTP via email
       const mailResponse = await transporter.sendMail(mailOptions);
@@ -156,13 +155,10 @@ class AdminUserController {
       }
 
       // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: "30d",
-        }
-      );
+  
+
+      const token = jwt.sign({ id: user._id, email: user.email },  process.env.JWT_SECRET, { expiresIn: '10d' });
+
 
       // Remove sensitive data before sending the response
       const userResponse = user.toObject();
@@ -176,7 +172,7 @@ class AdminUserController {
       });
     } catch (error) {
       console.error("Error in AdminLogin:", error);
-      return res.status(500).json({ message: "Internal Server Error" });
+      return res.status(500).json({ message: "Login----Internal Server Error" });
     }
   }
 
