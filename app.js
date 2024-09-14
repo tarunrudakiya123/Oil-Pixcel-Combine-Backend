@@ -15,38 +15,32 @@ ConnecionDb();
 
 // CORS configuration
 
-// const allowedOrigins = [
-//   process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
-//   process.env.REACT_APP_WEBSITE_FRONTEND_URL,
-// ];
+const allowedOrigins = [
+  process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
+  process.env.REACT_APP_WEBSITE_FRONTEND_URL,
+];
 
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       console.log("Incoming Origin:", origin);
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      console.log("Incoming Origin:", origin);
 
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     methods: ["GET", "POST", "PUT", "DELETE"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     preflightContinue: false,
-//     optionsSuccessStatus: 200,
-//   })
-// );
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(`Blocked by CORS: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,  // Add this to allow credentials (cookies or Authorization headers)
+    preflightContinue: false,
+    optionsSuccessStatus: 200,  // Make sure the preflight response status is 204 (No Content)
+  })
+);
 
-const corsOptions = {
-  origin: [
-    process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
-    process.env.REACT_APP_WEBSITE_FRONTEND_URL,
-  ],
-  credentials: true,
-};
 
-app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: "200mb" }));
 app.use(bodyParser.urlencoded({ limit: "300mb", extended: true }));
