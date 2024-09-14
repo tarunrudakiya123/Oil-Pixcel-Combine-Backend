@@ -19,7 +19,7 @@ class ProductController {
         return res
           .status(200)
           .send({ message: "Success", Product: UpdateResult });
-      res.cookie("IP", IP);
+
       return res.status(500).send({ message: "Somthiong Went Wrong" });
     } catch (error) {
       console.log(error);
