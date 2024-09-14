@@ -1,13 +1,16 @@
+const mongoose = require("mongoose");
 
-const mongoose = require("mongoose")
-
-const ConnecionDb = async() =>{
+const ConnecionDb = async () => {
     try {
-        await mongoose.connect("mongodb://localhost:27017/Amazona-2")
-        console.log("Data Base Connection Succesfull");
+        await mongoose.connect(process.env.MONGODB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log("Database Connection Successful");
     } catch (error) {
-        console.log(error);
-        console.log("Data Base Connection Loss");
+        console.error("Database Connection Error:", error.message);
+        console.error(error.stack);
     }
-}
-module.exports = ConnecionDb
+};
+
+module.exports = ConnecionDb;
