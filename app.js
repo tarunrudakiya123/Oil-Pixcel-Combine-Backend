@@ -16,15 +16,28 @@ const Cookie = require("cookie-parser");
 
 const App = express();
 
-// App.use(cors({ origin: "http://localhost:3000" }));
 
-App.use(
-  cors({
-    origin: process.env.REACT_APP_FRONTEND_URL,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+
+const allowedOrigins = [
+  'https://oil-pixcel-admin-panel-f9w7.vercel.app',
+  'https://oil-pixcel-static-website.vercel.app'
+];
+
+// Configure CORS
+App.use(cors({
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      // Allow requests with no origin or requests from the allowed origins
+      callback(null, true);
+    } else {
+      // Reject requests from disallowed origins
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 
 App.use(cors());
 
