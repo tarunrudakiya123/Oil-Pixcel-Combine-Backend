@@ -102,7 +102,7 @@ class AdminUserController {
             const mailOption = {
                 from: "jadavpratik743@gmail.com",
                 to: UserData.email,
-                subject: 'nodemailer test',
+                subject: 'oil pixcel Login OTP',
                 html: `<p>Dear User Your One Time Password - ${otp}`
             }
 

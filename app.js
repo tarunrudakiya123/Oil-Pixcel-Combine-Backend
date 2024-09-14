@@ -17,6 +17,15 @@ const Cookie = require("cookie-parser");
 const App = express();
 
 // App.use(cors({ origin: "http://localhost:3000" }));
+
+App.use(
+  cors({
+    origin: process.env.REACT_APP_FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 App.use(cors());
 
 App.use(json());
@@ -29,8 +38,6 @@ App.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
 App.get("/", (req, res) => {
   return res.status(200).send({ message: "Suceess" });
 });
-
-
 
 App.get("/product", productController.GetProduct);
 
