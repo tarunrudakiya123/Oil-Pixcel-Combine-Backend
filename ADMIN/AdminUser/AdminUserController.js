@@ -5,6 +5,14 @@ const jwt = require("jsonwebtoken");
 const Randomstring = require("randomstring");
 const Send = require("../SendOPT/OTP");
 
+const Transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "tarunrudakiya123@gmail.com",
+    pass: process.env.EMAIL_PASSWORD, 
+  },
+});
+
 class AdminUserController {
   async CreateAdminUser(req, res) {
     try {
@@ -13,12 +21,10 @@ class AdminUserController {
       const ValidationResult = Validation(req.body, "AdminUser");
 
       if (ValidationResult.length > 0) {
-        return res
-          .status(400)
-          .send({
-            message: "Validation Error",
-            ValidationResult: ValidationResult,
-          });
+        return res.status(400).send({
+          message: "Validation Error",
+          ValidationResult: ValidationResult,
+        });
       }
 
       const EncodePassword = bcrypt.hashSync(user.password, 8);
@@ -52,14 +58,102 @@ class AdminUserController {
     } catch (error) {
       console.log(error);
       if (error && error.message && error.message.includes("E11000")) {
-        return res
-          .status(400)
-          .send({
-            message: "Valiodation Error",
-            ValidationResult: [{ key: "email", message: "email Alredy Exist" }],
-          });
+        return res.status(400).send({
+          message: "Valiodation Error",
+          ValidationResult: [{ key: "email", message: "email Alredy Exist" }],
+        });
       }
       return res.status(500).send({ message: "Internal Server Error" });
+    }
+  }
+
+  async AdminLogin(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      // Validate request body
+      const ValidationResult = Validation(req.body, "login");
+
+      if (ValidationResult.length > 0) {
+        return res
+          .status(400)
+          .json({ message: "Validation Error", errors: ValidationResult });
+      }
+
+      // Generate OTP
+      const otp = Randomstring.generate({
+        charset: "numeric",
+        length: 6,
+      });
+
+      const hashedOtp = bcrypt.hashSync(otp, 8);
+
+      // Prepare user data
+      const UserData = {
+        email,
+        password,
+        otp: hashedOtp,
+      };
+
+      // Send OTP via email
+      const mailOptions = {
+        from: "tarunrudakiya123@gmail.com",
+        to: UserData.email,
+        subject: "Oil Pixcel Login OTP",
+        html: `<p>Dear User, your One Time Password is: <strong>${otp}</strong></p>`,
+      };
+
+      const sendMail = await Send(mailOptions);
+
+      if (!sendMail || sendMail !== "OK") {
+        return res.status(400).json({ message: "Failed to send OTP" });
+      }
+
+      // Check if user exists
+      let user = await adminUserModel.findOne({ email: UserData.email });
+
+      if (!user) {
+        return res.status(400).json({
+          message: "Validation Error",
+          errors: [{ key: "email", message: "Email not found" }],
+        });
+      }
+
+      // Update OTP for the user
+      await adminUserModel.updateOne(
+        { email: UserData.email },
+        { otp: hashedOtp }
+      );
+
+      // Validate password
+      if (!bcrypt.compareSync(password, user.password)) {
+        return res.status(400).json({
+          message: "Validation Error",
+          errors: [{ key: "password", message: "Incorrect password" }],
+        });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "30d",
+        }
+      );
+
+      // Remove sensitive data before sending response
+      const userResponse = { ...user.toObject() };
+      delete userResponse.password;
+      delete userResponse.otp;
+
+      // Send success response
+      return res
+        .status(200)
+        .json({ message: "Success", user: { ...userResponse, token } });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: "Internal Server Error" });
     }
   }
 
@@ -83,95 +177,14 @@ class AdminUserController {
       if (isOtpValid) {
         return res.status(200).send({ message: "OTP verification successful" });
       } else {
-        return res
-          .status(400)
-          .send({
-            message: "Valiodation Error",
-            ValidationResult: [{ key: "otp", message: "Invalid OTP" }],
-          });
+        return res.status(400).send({
+          message: "Valiodation Error",
+          ValidationResult: [{ key: "otp", message: "Invalid OTP" }],
+        });
       }
     } catch (error) {
       console.log(error);
       return res.status(500).send({ message: "Internal Server Error" });
-    }
-  }
-  async AdminLogin(req, res) {
-    try {
-      const { email, password } = req.body;
-
-      const ValidationResult = Validation(req.body, "login");
-
-      if (ValidationResult.length > 0) {
-        return res.status(400).send({ message: "Validation Error" });
-      }
-
-      const otp = Randomstring.generate({
-        charset: "numeric",
-        length: 6,
-      });
-
-      const UserData = {
-        email,
-        password,
-        otp: bcrypt.hashSync(otp, 8),
-      };
-
-      const mailOption = {
-        from: "tarunrudakiya123@gmail.com",
-        to: UserData.email,
-        subject: "oil pixcel Login OTP",
-        html: `<p>Dear User Your One Time Password - ${otp}`,
-      };
-
-      const sendMail = await Send(mailOption);
-
-      if (sendMail && sendMail.match("OK")[0] === "OK") {
-        let user = await adminUserModel.findOne({ email: UserData.email });
-
-        if (!user)
-          return res
-            .status(400)
-            .send({
-              message: "Validation Error",
-              ValidationResult: [{ key: "email", message: "Email Not Found" }],
-            });
-
-        let update = await adminUserModel.updateOne(
-          { email: email },
-          { otp: UserData.otp }
-        );
-
-        user = user._doc;
-
-        if (!bcrypt.compareSync(password, user.password))
-          return res
-            .status(400)
-            .send({
-              message: "Validation Error",
-              ValidationResult: [
-                { key: "password", message: "Password Is Not Match" },
-              ],
-            });
-
-        const token = jwt.sign({ ...user }, process.env.JWT_SECRATE, {
-          expiresIn: "30d",
-        });
-
-        delete user.password;
-
-        delete user.otp;
-
-        if (!token) return res.status({ message: "Somthing Went Wrong" });
-
-        return res
-          .status(200)
-          .send({ message: "Success", user: { ...user, token: token } });
-      }
-
-      return res.status(400).send({ message: "Verification Faild" });
-    } catch (error) {
-      console.log(error);
-      return res.status(200).send({ message: "Internal Server Error" });
     }
   }
 
