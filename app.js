@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const dotenv = require("dotenv");
+const AdminRouter = require("./ADMIN/AdminRouter");
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("Incoming Origin:", origin); 
+      console.log("Incoming Origin:", origin);
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -29,9 +30,11 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     preflightContinue: false,
-    optionsSuccessStatus: 200, 
+    optionsSuccessStatus: 200,
   })
 );
+
+app.use("/admin", AdminRouter);
 
 // Serve static files
 app.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
@@ -46,7 +49,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const port = process.env.PORT || 3000; 
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is started for serving on port ${port}`);
 });
