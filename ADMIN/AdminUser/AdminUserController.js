@@ -112,8 +112,42 @@ class AdminUserController {
         from: "tarunrudakiya123@gmail.com",
         to: email,
         subject: "Oil Pixcel Login OTP",
-        html: `<p>Dear User, your One Time Password is: <strong>${otp}</strong></p>`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #f9f9f9;">
+            <div style="text-align: center; padding-bottom: 20px;">
+              <img src="https://oil-pixcel-static-website.vercel.app/logo.png" alt="Oil Pixcel Logo" style="max-width: 150px; margin-bottom: 20px;">
+            </div>
+      
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+              <h2 style="color: #333; text-align: center;">Oil Pixcel Login OTP</h2>
+              <p style="font-size: 16px; color: #555; text-align: center;">
+                Dear User,<br>
+                Please use the following One Time Password (OTP) to login to your Oil Pixcel account:
+              </p>
+      
+              <div style="text-align: center; margin: 30px 0;">
+                <span style="display: inline-block; font-size: 32px; padding: 15px 30px; background-color: #FFA500; color: white; border-radius: 5px; letter-spacing: 4px;">
+                  ${otp}
+                </span>
+              </div>
+      
+              <p style="font-size: 16px; color: #555; text-align: center;">
+                This OTP is valid for the next 10 minutes. Please do not share this code with anyone for your account’s security.
+              </p>
+            </div>
+      
+            <div style="text-align: center; padding: 20px 0; color: #777;">
+              <p style="font-size: 14px;">
+                If you did not request this OTP, please contact us immediately at <a href="mailto:tarunrudakiya123@gmail.com" style="color: #FFA500; text-decoration: none;">tarunrudakiya123@gmail.com</a>.
+              </p>
+              <p style="font-size: 12px; color: #999;">
+                © 2024 Oil Pixcel By Tarun Rudakiya. All rights reserved.
+              </p>
+            </div>
+          </div>
+        `,
       };
+      
 
       // Send OTP via email
       const mailResponse = await transporter.sendMail(mailOptions);
