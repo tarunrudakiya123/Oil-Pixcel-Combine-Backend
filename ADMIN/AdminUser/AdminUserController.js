@@ -3,17 +3,7 @@ const adminUserModel = require("./AdminUserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Randomstring = require("randomstring");
-const Send = require("../SendOPT/OTP");
-const nodemailer = require("nodemailer")
-
-
-const Transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: "tarunrudakiya123@gmail.com",
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+const nodemailer = require("nodemailer");
 
 class AdminUserController {
   async CreateAdminUser(req, res) {
@@ -70,49 +60,33 @@ class AdminUserController {
   }
 
   async AdminLogin(req, res) {
+    const { email, password } = req.body;
+
     try {
-      const { email, password } = req.body;
-
-      // Validate request body
-      const ValidationResult = Validation(req.body, "login");
-
-      if (ValidationResult.length > 0) {
-        return res
-          .status(400)
-          .json({ message: "Validation Error", errors: ValidationResult });
-      }
-
-      // Generate OTP
-      const otp = Randomstring.generate({
-        charset: "numeric",
-        length: 6,
+      // Setup Nodemailer transport
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: "tarunrudakiya123@gmail.com",
+          pass: process.env.EMAIL_PASSWORD,
+        },
       });
 
-      const hashedOtp = bcrypt.hashSync(otp, 8);
-
-      // Prepare user data
-      const UserData = {
-        email,
-        password,
-        otp: hashedOtp,
-      };
-
-      // Send OTP via email
-      const mailOptions = {
-        from: "tarunrudakiya123@gmail.com",
-        to: UserData.email,
-        subject: "Oil Pixcel Login OTP",
-        html: `<p>Dear User, your One Time Password is: <strong>${otp}</strong></p>`,
-      };
-
-      const sendMail = await Send(mailOptions);
-
-      if (!sendMail || sendMail !== "OK") {
-        return res.status(400).json({ message: "Failed to send OTP" });
+      // Validate the request body
+      const validationErrors = Validation(req.body, "login");
+      if (validationErrors.length > 0) {
+        return res.status(400).json({
+          message: "Validation Error",
+          errors: validationErrors,
+        });
       }
 
-      // Check if user exists
-      let user = await adminUserModel.findOne({ email: UserData.email });
+      // Generate OTP and hash it
+      const otp = Randomstring.generate({ charset: "numeric", length: 6 });
+      const hashedOtp = bcrypt.hashSync(otp, 8);
+
+      // Find the user by email
+      const user = await adminUserModel.findOne({ email });
 
       if (!user) {
         return res.status(400).json({
@@ -121,18 +95,30 @@ class AdminUserController {
         });
       }
 
-      // Update OTP for the user
-      await adminUserModel.updateOne(
-        { email: UserData.email },
-        { otp: hashedOtp }
-      );
-
       // Validate password
-      if (!bcrypt.compareSync(password, user.password)) {
+      const isPasswordValid = bcrypt.compareSync(password, user.password);
+      if (!isPasswordValid) {
         return res.status(400).json({
           message: "Validation Error",
           errors: [{ key: "password", message: "Incorrect password" }],
         });
+      }
+
+      // Update the user's OTP in the database
+      await adminUserModel.updateOne({ email }, { otp: hashedOtp });
+
+      // Prepare email options
+      const mailOptions = {
+        from: "tarunrudakiya123@gmail.com",
+        to: email,
+        subject: "Oil Pixcel Login OTP",
+        html: `<p>Dear User, your One Time Password is: <strong>${otp}</strong></p>`,
+      };
+
+      // Send OTP via email
+      const mailResponse = await transporter.sendMail(mailOptions);
+      if (!mailResponse || mailResponse.accepted.length === 0) {
+        return res.status(400).json({ message: "Failed to send OTP" });
       }
 
       // Generate JWT token
@@ -144,17 +130,18 @@ class AdminUserController {
         }
       );
 
-      // Remove sensitive data before sending response
-      const userResponse = { ...user.toObject() };
+      // Remove sensitive data before sending the response
+      const userResponse = user.toObject();
       delete userResponse.password;
       delete userResponse.otp;
 
       // Send success response
-      return res
-        .status(200)
-        .json({ message: "Success", user: { ...userResponse, token } });
+      return res.status(200).json({
+        message: "Success",
+        user: { ...userResponse, token },
+      });
     } catch (error) {
-      console.error(error);
+      console.error("Error in AdminLogin:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }
