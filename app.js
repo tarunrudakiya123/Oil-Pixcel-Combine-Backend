@@ -12,7 +12,6 @@ require("dotenv").config();
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
-const IP = require("./IPv4/IP");
 const Cookie = require("cookie-parser");
 
 const App = express();
@@ -28,8 +27,7 @@ ConnecionDb();
 App.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
 
 App.get("/", (req, res) => {
-  res.cookie("IP", IP);
-  return res.status(200).send({ message: "Suceess", IP });
+  return res.status(200).send({ message: "Suceess" });
 });
 
 
@@ -69,7 +67,6 @@ App.post(
 /////////// ADMIN API////////////
 
 App.use("/admin", AdminRouter);
-console.log(IP);
 const options = {
   key: fs.readFileSync("Certification/key.pem"),
   cert: fs.readFileSync("Certification/cert.pem"),

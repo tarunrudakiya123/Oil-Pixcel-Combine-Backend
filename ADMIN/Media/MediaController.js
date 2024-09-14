@@ -58,7 +58,7 @@ class MediaController {
       });
 
       // Generate URL for accessing the media
-      const url = `https://localhost:5100${relativePath}`;
+      const url = `${REACT_APP_BACKEND_URL}${relativePath}`;
 
       res.json({ success: true, media: { ...Media._doc, url } });
     } catch (error) {
@@ -68,9 +68,6 @@ class MediaController {
         .json({ message: "Hello Tarun ---- Internal Server Error" });
     }
   }
-
-
-
 
   async ShowMedia(req, res) {
     try {
@@ -83,33 +80,23 @@ class MediaController {
             _id: 1,
             mimetype: 1,
             url: {
-              $concat: ["https://localhost:5100", "$path"], // Ensure path is correctly formatted
+              $concat: [process.env.REACT_APP_BACKEND_URL, "$path"], // Ensure path is correctly formatted
             },
           }
         )
         .sort({ createdAt: -1 });
-  
+
       if (result.length > 0) {
         return res.status(200).json({ message: "Success", media: result });
       }
-  
+
       return res.status(400).json({ message: "Something Went Wrong" });
     } catch (error) {
       console.error("Error in ShowMedia:", error); // Improved error message
       return res.status(500).json({ message: "Internal Server Error" });
     }
   }
-  
-
-  
-
-
 }
 
 const mediaController = new MediaController();
 module.exports = mediaController;
-
-
-
-
-
