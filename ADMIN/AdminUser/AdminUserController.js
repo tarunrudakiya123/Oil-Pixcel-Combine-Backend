@@ -4,12 +4,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Randomstring = require("randomstring");
 const Send = require("../SendOPT/OTP");
+const nodemailer = require("nodemailer")
+
 
 const Transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: "tarunrudakiya123@gmail.com",
-    pass: process.env.EMAIL_PASSWORD, 
+    pass: process.env.EMAIL_PASSWORD,
   },
 });
 
