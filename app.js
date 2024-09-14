@@ -1,24 +1,25 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fs = require("fs");
-const https = require("https");
 const dotenv = require("dotenv");
+
 dotenv.config();
 
-const App = express();
+const app = express();
 
-App.use(express.json());
+// Middleware to parse JSON
+app.use(express.json());
 
+// CORS configuration
 const allowedOrigins = [
   process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
   process.env.REACT_APP_WEBSITE_FRONTEND_URL,
 ];
 
-App.use(
+app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("Incoming Origin:", origin); // Log origin for debugging
+      console.log("Incoming Origin:", origin); 
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -28,21 +29,24 @@ App.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     preflightContinue: false,
-    optionsSuccessStatus: 200, // For legacy browser support
+    optionsSuccessStatus: 200, 
   })
 );
 
-const options = {
-  key: fs.readFileSync("Certification/key.pem"),
-  cert: fs.readFileSync("Certification/cert.pem"),
-};
+// Serve static files
+app.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
 
-App.use("/uploads", express.static(path.join(__dirname, "/ADMIN/uploads")));
+// Route
+app.get("/", (req, res) => res.status(200).send({ message: "Success" }));
 
-App.get("/", (req, res) => res.status(200).send({ message: "Success" }));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send({ error: "Something went wrong!" });
+});
 
-const server = https.createServer(options, App);
-
-server.listen(process.env.PORT, () => {
-  console.log(`Server is started for serving on port ${process.env.PORT}`);
+// Start server
+const port = process.env.PORT || 3000; 
+app.listen(port, () => {
+  console.log(`Server is started for serving on port ${port}`);
 });
