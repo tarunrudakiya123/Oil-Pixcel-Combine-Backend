@@ -17,10 +17,31 @@ const allowedOrigins = [
   process.env.REACT_APP_WEBSITE_FRONTEND_URL,
 ];
 
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       console.log("Incoming Origin:", origin);
+      
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     preflightContinue: false,
+//     optionsSuccessStatus: 200,
+//   })
+// );
+
+
 app.use(
   cors({
     origin: function (origin, callback) {
       console.log("Incoming Origin:", origin);
+
+      // Allow requests without an origin (like same-origin requests or non-browser clients)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -33,6 +54,7 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
+
 
 app.use("/admin", AdminRouter);
 
