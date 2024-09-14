@@ -9,7 +9,7 @@ class ProductController {
         FeatureImages: data.FeatureImages
           ? {
               ...data.FeatureImages,
-              url: `https://localhost:5100${data.FeatureImages.path}`,
+              url: `${process.env.REACT_APP_BACKEND_URL}${data.FeatureImages.path}`,
             }
           : null,
       }));
@@ -37,8 +37,9 @@ class ProductController {
       result = {
         ...result._doc,
         FeatureImages:
-          (result.FeatureImages.url = `https://localhost:5100${result.FeatureImages.path}`),
+          (result.FeatureImages.url = `${process.env.REACT_APP_BACKEND_URL}${result.FeatureImages.path}`),
       };
+
       if (result)
         return res.status(200).send({ message: "Success", product: result });
       return res.status(500).send({ message: "Somthing Went Wrong " });
@@ -64,7 +65,7 @@ class ProductController {
         FeatureImages: data.FeatureImages
           ? {
               ...data.FeatureImages,
-              url: `https://localhost:5100${data.FeatureImages.path}`,
+              url: `${process.env.REACT_APP_BACKEND_URL}${data.FeatureImages.path}`,
             }
           : null,
       }));
@@ -158,7 +159,7 @@ class ProductController {
         FeatureImages: data?.FeatureImages
           ? {
               ...data.FeatureImages,
-              url: `https://localhost:5100${data.FeatureImages.path}`,
+              url: `${process.env.REACT_APP_BACKEND_URL}${data.FeatureImages.path}`,
             }
           : null,
       }));
@@ -188,7 +189,7 @@ class ProductController {
           FeatureImages: result?.FeatureImages
             ? {
                 ...result.FeatureImages,
-                url: `https://localhost:5100${result.FeatureImages.path}`,
+                url: `${process.env.REACT_APP_BACKEND_URL}${data.FeatureImages.path}`,
               }
             : null,
         };

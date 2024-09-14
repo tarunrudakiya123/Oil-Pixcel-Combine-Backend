@@ -73,7 +73,6 @@ console.log(IP);
 const options = {
   key: fs.readFileSync("Certification/key.pem"),
   cert: fs.readFileSync("Certification/cert.pem"),
-  // passphrase: "jadav12345"
 };
 
 const server = https.createServer(options, App);
