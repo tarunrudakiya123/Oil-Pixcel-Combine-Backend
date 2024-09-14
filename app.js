@@ -10,10 +10,6 @@ const fs = require("fs");
 
 const app = express();
 
-const Port = process.env.PORT;
-ConnecionDb();
-
-// CORS configuration
 
 const allowedOrigins = [
   process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
@@ -34,11 +30,19 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,  // Add this to allow credentials (cookies or Authorization headers)
-    preflightContinue: false,
-    optionsSuccessStatus: 200,  // Make sure the preflight response status is 204 (No Content)
+    credentials: true, // Allows sending cookies or Authorization headers
+    optionsSuccessStatus: 200, // Response to preflight requests
   })
 );
+
+
+
+
+
+const Port = process.env.PORT || 3000;
+ConnecionDb();
+
+// CORS configuration
 
 
 
