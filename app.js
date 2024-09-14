@@ -46,7 +46,7 @@ app.use(
 //   credentials: true,
 // };
 
-app.use(cors(allowedOrigins));
+// app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: "200mb" }));
 app.use(bodyParser.urlencoded({ limit: "300mb", extended: true }));
