@@ -15,38 +15,38 @@ ConnecionDb();
 
 // CORS configuration
 
-const allowedOrigins = [
-  process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
-  process.env.REACT_APP_WEBSITE_FRONTEND_URL,
-];
+// const allowedOrigins = [
+//   process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
+//   process.env.REACT_APP_WEBSITE_FRONTEND_URL,
+// ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("Incoming Origin:", origin);
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       console.log("Incoming Origin:", origin);
 
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    preflightContinue: false,
-    optionsSuccessStatus: 200,
-  })
-);
+//       if (!origin || allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     preflightContinue: false,
+//     optionsSuccessStatus: 200,
+//   })
+// );
 
-// const corsOptions = {
-//   origin: [
-//     process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
-//     process.env.REACT_APP_WEBSITE_FRONTEND_URL,
-//   ],
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: [
+    process.env.REACT_APP_ADMINPANEL_FRONTEND_URL,
+    process.env.REACT_APP_WEBSITE_FRONTEND_URL,
+  ],
+  credentials: true,
+};
 
-// app.use(cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json({ limit: "200mb" }));
 app.use(bodyParser.urlencoded({ limit: "300mb", extended: true }));
